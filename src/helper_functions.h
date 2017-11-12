@@ -19,26 +19,20 @@
 const double M_PI = 3.14159265358979323846;
 #endif
 
-/*
-* Struct representing one position/control measurement.
-*/
+/* Struct representing one position/control measurement. */
 struct control_s {
 	double velocity;	// Velocity [m/s]
 	double yaw_rate;		// Yaw rate [rad/s]
 };
 
-/*
-* Struct representing one ground truth position.
-*/
+/* Struct representing one ground truth position. */
 struct ground_truth {
 	double x;		// Global vehicle x position [m]
 	double y;		// Global vehicle y position
 	double theta;	// Global vehicle yaw [rad]
 };
 
-/*
-* Struct representing one landmark observation measurement.
-*/
+/* Struct representing one landmark observation measurement. */
 struct LandmarkObs {
 	int id;				// Id of matching landmark in the map.
 	double x;			// Local (vehicle coordinates) x position of landmark observation [m]
@@ -228,7 +222,7 @@ inline bool read_landmark_data(std::string filename, std::vector<LandmarkObs>& o
 		// Add to list of control measurements:
 		observations.push_back(meas);
 	}
-	
+
 	return true;
 }
 

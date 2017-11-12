@@ -82,6 +82,12 @@ void ParticleFilter::prediction(double Dt, double std_pos[], double velocity, do
 	}
 }
 
+// struct LandmarkObs {
+// 	int id;				// Id of matching landmark in the map.
+// 	double x;			// Local (vehicle coordinates) x position of landmark observation [m]
+// 	double y;			// Local (vehicle coordinates) y position of landmark observation [m]
+// };
+
 void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations) {
 	// TODO: Find the predicted measurement that is closest to each observed measurement and assign the
 	//   observed measurement to this particular landmark.
@@ -104,10 +110,31 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	}
 
 	void ParticleFilter::resample() {
-		// TODO: Resample particles with replacement with probability proportional to their weight.
-		// NOTE: You may find std::discrete_distribution helpful here.
-		//   http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
+		// Resample particles with replacement with probability proportional to their weight.
+		// NOTE: You may find std::discrete_distribution helpful here: http://en.cppreference.com/w/cpp/numeric/random/discrete_distribution
 
+		default_random_engine rand_gen;
+		uniform_real_distribution<double> distribution(0.0, 1,0);
+
+		vector<Particle> new_particles;
+		int index = int(num_particles * distribution(rand_gen));
+		double beta = 0;
+
+		double max_weight = 0.0;
+		for(int i = 0; i < weights.size(); ++i) {
+			if(weights[i] > max_weight) max_weight = weights[i];
+		}
+
+		for(int i = 0; i < num_particles; ++i) {
+			beta += 2 * max_weight * distribution(rand_gen);
+			while(beta > weights[index]) {
+				beta -= weights[index];
+				index = (index + 1) % num_particles;
+			}
+			new_particles.push_back(particles[index])
+		}
+
+		particles = new_particles;
 	}
 
 	Particle ParticleFilter::SetAssociations(Particle particle, std::vector<int> associations, std::vector<double> sense_x, std::vector<double> sense_y) {
