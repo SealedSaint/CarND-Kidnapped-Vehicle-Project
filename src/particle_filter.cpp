@@ -82,12 +82,6 @@ void ParticleFilter::prediction(double Dt, double std_pos[], double velocity, do
 	}
 }
 
-// struct LandmarkObs {
-// 	int id;				// Id of matching landmark in the map.
-// 	double x;			// Local (vehicle coordinates) x position of landmark observation [m]
-// 	double y;			// Local (vehicle coordinates) y position of landmark observation [m]
-// };
-
 void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations) {
 	// TODO: Find the predicted measurement that is closest to each observed measurement and assign the
 	//   observed measurement to this particular landmark.
@@ -96,17 +90,77 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::ve
 
 }
 
-void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
-	const std::vector<LandmarkObs> &observations, const Map &map_landmarks) {
-		// TODO: Update the weights of each particle using a mult-variate Gaussian distribution. You can read
+void ParticleFilter::updateWeights(
+	double sensor_range, double std_landmark[],
+	const std::vector<LandmarkObs> &observations, const Map &map_landmarks
+) {
+		// Update the weights of each particle using a mult-variate Gaussian distribution. You can read
 		//   more about this distribution here: https://en.wikipedia.org/wiki/Multivariate_normal_distribution
 		// NOTE: The observations are given in the VEHICLE'S coordinate system. Your particles are located
 		//   according to the MAP'S coordinate system. You will need to transform between the two systems.
 		//   Keep in mind that this transformation requires both rotation AND translation (but no scaling).
-		//   The following is a good resource for the theory:
-		//   https://www.willamette.edu/~gorr/classes/GeneralGraphics/Transforms/transforms2d.htm
-		//   and the following is a good resource for the actual equation to implement (look at equation 3.33)
-		//   http://planning.cs.uiuc.edu/node99.html
+		//   The following is a good resource for the theory: https://www.willamette.edu/~gorr/classes/GeneralGraphics/Transforms/transforms2d.htm
+		//   and the following is a good resource for the actual equation to implement (look at equation 3.33): http://planning.cs.uiuc.edu/node99.html
+
+		for(int p_i = 0; p_i < num_particles; ++p_i) {
+			Particle p = particles[p_i];
+
+			// Transform each observation into the map coordinate system (from the vehicle's)
+			// Associate each transformed obersation with a map landmark
+			vector<LandmarkObs> map_observations;
+			for(int o_i = 0; o_i < observations.size(); ++o_i) {
+				LandmarkObs car_obs = observations[o_i];
+
+				LandmarkObs = map_obs;
+				map_obs.x = p.x + (car_obs.x * cos(p.theta)) - (car_obs.y * sin(p.theta));
+				map_obs.y = p.y + (car_obs.x * sin(p.theta)) + (car_obs.y * cos(p.theta));
+
+				// Associate each transformed map observation to a map landmark
+				double min_dist = sensor_range;
+				for(int l_i = 0; i < map_landmarks.landmark_list.size(); ++l_i) {
+					single_landmark landmark = map_landmarks.landmark_list[l_i];
+
+					double distance = dist(map_obs.x, landmark.x, map_obs.y, landmark.y);
+					if(l_i == 0) { // Just assign the first, regardless of distance, so we always get an association
+						min_dist = distance
+						map_obs.id = landmark.id;
+					}
+					else if(distance < min_dist) {
+						min_dist = distance;
+						map_obs.id = landmark.id;
+					}
+				}
+
+				map_observations.push_back(obs);
+			}
+
+			// Calculate (and update) the weight for the particle based on all map_observations (with associated landmark)
+			// Weight = product of each measurement's Multivariate-Gaussian probability
+			double weight = 1;
+			double sig_x = std_landmark[0];
+			double sig_y = std_landmark[1];
+			double c1 = 1 / (2 * M_PI * sig_x * sig_y);
+			for(int m_i = 0; m_i < map_observations.size(); ++m_i) {
+				LandmarkObs obs = map_observations[m_i];
+
+				// Get the associate landmark
+				single_landmark landmark;
+				for(int l_i = 0; l_i < map_landmarks.landmark_list.size(); ++l_i) {
+					single_landmark l = map_landmarks.landmark_list[l_i];
+
+					if(l.id == obs.id) {
+						landmark = l;
+						break;
+					}
+				}
+
+				double exponent = ((obs.x - landmark.x)**2 / (2 * sig_x**2) + (obs.y - landmark.y)**2 / (2 * sig_y**2));
+
+				weight *= c1 * exp(-exponent);
+			}
+
+			p.weight = weight;
+		}
 	}
 
 	void ParticleFilter::resample() {
