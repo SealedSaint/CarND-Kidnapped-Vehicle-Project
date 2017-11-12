@@ -20,17 +20,66 @@
 using namespace std;
 
 void ParticleFilter::init(double x, double y, double theta, double std[]) {
-	// TODO: Set the number of particles. Initialize all particles to first position (based on estimates of
+	// Set the number of particles. Initialize all particles to first position (based on estimates of
 	//   x, y, theta and their uncertainties from GPS) and all weights to 1.
 	// Add random Gaussian noise to each particle.
 	// NOTE: Consult particle_filter.h for more information about this method (and others in this file).
 
+	default_random_engine rand_gen; // For sampling the normal distribution
+
+	// Create normal distributions for each measurement
+	normal_distribution<double> dist_x(x, std[0]);
+	normal_distribution<double> dist_y(y, std[1]);
+	normal_distribution<double> dist_theta(theta, std[2]);
+
+	num_particles = 1000; // TODO: Tweak this
+	for(int i = 0; i < num_particles; ++i) {
+		// Add a particle
+		Particle p;
+		p.x = dist_x(rand_gen);
+		p.y = dist_y(rand_gen);
+		p.theta = dist_theta(rand_gen);
+		p.weight = 1.0;
+
+		particles.push_back(p);
+	}
+
+	is_initialized = true;
 }
 
-void ParticleFilter::prediction(double delta_t, double std_pos[], double velocity, double yaw_rate) {
-	// TODO: Add measurements to each particle and add random Gaussian noise.
+void ParticleFilter::prediction(double Dt, double std_pos[], double velocity, double yaw_rate) {
+	// Add measurements to each particle and add random Gaussian noise.
 	// NOTE: When adding noise you may find std::normal_distribution and std::default_random_engine useful.
 
+	default_random_engine rand_gen; // For sampling the normal distribution
+
+	// Update each particle
+	for(int i = 0; i < particles.size(); ++i) {
+		double x = particles[i].x;
+		double y = particles[i].y;
+		double theta = particles[i].theta;
+
+		// Calculate new values from measurements
+		// TODO: Understand why x is determined by sin and y is determined by cos
+		if(abs(yaw_rate) < .001) { // Don't divide by zero
+			x += (velocity / yaw_rate) * (sin(theta + yaw_rate * Dt) - sin(theta));
+			y += (velocity / yaw_rate) * (cos(theta) - cos(theta + yaw_rate * Dt));
+			theta += yaw_rate * Dt;
+		}
+		else { // yaw_rate is zero
+			x += velocity * sin(theta) * Dt;
+			y += velocity * cos(theta) * Dt;
+		}
+
+		// Create normal distributions for each measurement
+		normal_distribution<double> dist_x(x, std_pos[0]);
+		normal_distribution<double> dist_y(y, std_pos[1]);
+		normal_distribution<double> dist_theta(theta, std_pos[2]);
+
+		particles[i].x = dist_x(rand_gen);
+		particles[i].y = dist_y(rand_gen);
+		particles[i].theta = dist_theta(rand_gen);
+	}
 }
 
 void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::vector<LandmarkObs>& observations) {

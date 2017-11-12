@@ -23,13 +23,12 @@ struct Particle {
 };
 
 class ParticleFilter {
-	
+	// These have private access by default...
 	int num_particles; // Number of particles to draw
 	bool is_initialized; // Flag, if filter is initialized
 	std::vector<double> weights; // Vector of weights of all particles
 
 public:
-
 	// Set of current particles
 	std::vector<Particle> particles;
 
@@ -52,15 +51,14 @@ public:
 	void init(double x, double y, double theta, double std[]);
 
 	/**
-	* prediction Predicts the state for the next time step
-	*   using the process model.
-	* @param delta_t Time between time step t and t+1 in measurements [s]
+	* prediction Predicts the state for the next time step using the process model.
+	* @param Dt Time between time step t and t+1 in measurements [s]
 	* @param std_pos[] Array of dimension 3 [standard deviation of x [m], standard deviation of y [m]
 	*   standard deviation of yaw [rad]]
 	* @param velocity Velocity of car from t to t+1 [m/s]
 	* @param yaw_rate Yaw rate of car from t to t+1 [rad/s]
 	*/
-	void prediction(double delta_t, double std_pos[], double velocity, double yaw_rate);
+	void prediction(double Dt, double std_pos[], double velocity, double yaw_rate);
 
 	/**
 	* dataAssociation Finds which observations correspond to which landmarks (likely by using
