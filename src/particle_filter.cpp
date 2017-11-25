@@ -33,7 +33,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	normal_distribution<double> dist_y(y, std[1]);
 	normal_distribution<double> dist_theta(theta, std[2]);
 
-	num_particles = 100; // TODO: Tweak this
+	num_particles = 750; // TODO: Tweak this
 
 	for(int i = 0; i < num_particles; ++i) {
 		// Add a particle
@@ -47,7 +47,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 		weights.push_back(p.weight);
 	}
 
-	PrintParticles("INITIAL PARTICLES:", false);
+	// PrintParticles("INITIAL PARTICLES:", false);
 
 	// cout << "Finished Initializing!" << endl;
 	is_initialized = true;
@@ -58,6 +58,7 @@ void ParticleFilter::prediction(double Dt, double std_pos[], double velocity, do
 	// NOTE: When adding noise you may find std::normal_distribution and std::default_random_engine useful.
 
 	cout << "Beginning predition step..." << endl;
+	cout << "velocity, yaw_rate: " << velocity << ", " << yaw_rate << endl;
 	default_random_engine rand_gen; // For sampling the normal distribution
 
 	// Update each particle
@@ -67,15 +68,12 @@ void ParticleFilter::prediction(double Dt, double std_pos[], double velocity, do
 		double theta = particles[i].theta;
 
 		// Calculate new values from measurements
-		// TODO: Understand why x is determined by sin and y is determined by cos
-		// 				Is it because derivative and integral of cos = sin?
-		if(abs(yaw_rate) < .0001) { // Don't divide by zero
+		if(abs(yaw_rate) > .00001) { // Don't divide by zero
 			x += (velocity / yaw_rate) * (sin(theta + yaw_rate * Dt) - sin(theta));
 			y += (velocity / yaw_rate) * (cos(theta) - cos(theta + yaw_rate * Dt));
 			theta += yaw_rate * Dt;
 		}
 		else { // yaw_rate is zero
-			// TODO: Reverse back if I was wrong about sin & cos
 			x += velocity * cos(theta) * Dt;
 			y += velocity * sin(theta) * Dt;
 		}
@@ -90,7 +88,7 @@ void ParticleFilter::prediction(double Dt, double std_pos[], double velocity, do
 		particles[i].theta = dist_theta(rand_gen);
 	}
 
-	PrintParticles("PREDICTED PARTICLES:", false);
+	// PrintParticles("PREDICTED PARTICLES:", false);
 
 	// cout << "Finished prediction step!" << endl;
 }
@@ -192,7 +190,9 @@ void ParticleFilter::updateWeights(
 			weight *= val;
 		}
 
-		cout << "New weight is: " << weight << endl;
+		if(weight < DBL_EPSILON) weight = DBL_EPSILON;
+
+		// cout << "New weight is: " << weight << endl;
 		new_weights.push_back(weight);
 	}
 
@@ -220,7 +220,7 @@ void ParticleFilter::resample() {
 
 	NormalizeWeights();
 
-	PrintParticles("RESAMPLED PARTICLES:", true);
+	// PrintParticles("RESAMPLED PARTICLES:", true);
 }
 
 // void ParticleFilter::resample() {
