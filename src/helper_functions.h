@@ -19,6 +19,11 @@
 const double M_PI = 3.14159265358979323846;
 #endif
 
+// For making sure values are just above zero
+#ifndef DBL_EPSILON
+const double DBL_EPSILON = std::numeric_limits<double>::epsilon();
+#endif
+
 /* Struct representing one position/control measurement. */
 struct control_s {
 	double velocity;	// Velocity [m/s]
@@ -90,12 +95,12 @@ inline bool read_map_data(std::string filename, Map& map) {
 		iss_map >> id_i;
 
 		// Declare single_landmark:
-		Map::single_landmark_s single_landmark_temp;
+		Map::single_landmark single_landmark_temp;
 
 		// Set values
-		single_landmark_temp.id_i = id_i;
-		single_landmark_temp.x_f  = landmark_x_f;
-		single_landmark_temp.y_f  = landmark_y_f;
+		single_landmark_temp.id = id_i;
+		single_landmark_temp.x  = landmark_x_f;
+		single_landmark_temp.y  = landmark_y_f;
 
 		// Add to landmark list of map:
 		map.landmark_list.push_back(single_landmark_temp);
@@ -124,18 +129,18 @@ inline bool read_control_data(std::string filename, std::vector<control_s>& posi
 		std::istringstream iss_pos(line_pos);
 
 		// Declare position values:
-		double velocity, yawrate;
+		double velocity, yaw_rate;
 
 		// Declare single control measurement:
 		control_s meas;
 
 		//read data from line to values:
 		iss_pos >> velocity;
-		iss_pos >> yawrate;
+		iss_pos >> yaw_rate;
 
 		// Set values
 		meas.velocity = velocity;
-		meas.yawrate = yawrate;
+		meas.yaw_rate = yaw_rate;
 
 		// Add to list of control measurements:
 		position_meas.push_back(meas);

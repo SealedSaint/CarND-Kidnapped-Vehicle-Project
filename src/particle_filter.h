@@ -93,6 +93,10 @@ public:
 	std::string getSenseX(Particle best);
 	std::string getSenseY(Particle best);
 
+	void NormalizeWeights();
+
+	void PrintParticles(std::string heading, bool show_weights);
+
 	/**
 	* initialized Returns whether particle filter is initialized yet or not.
 	*/
