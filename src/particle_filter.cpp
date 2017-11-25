@@ -24,7 +24,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
 	//   x, y, theta and their uncertainties from GPS) and all weights to 1.
 	// Add random Gaussian noise to each particle.
 	// NOTE: Consult particle_filter.h for more information about this method (and others in this file).
-	cout << "Initializing filter with (x,y,theta): (" << x << "," << y << "," << theta << ")" << endl;
+	// cout << "Initializing filter with (x,y,theta): (" << x << "," << y << "," << theta << ")" << endl;
 
 	default_random_engine rand_gen; // For sampling the normal distribution
 
@@ -57,8 +57,8 @@ void ParticleFilter::prediction(double Dt, double std_pos[], double velocity, do
 	// Add measurements to each particle and add random Gaussian noise.
 	// NOTE: When adding noise you may find std::normal_distribution and std::default_random_engine useful.
 
-	cout << "Beginning predition step..." << endl;
-	cout << "velocity, yaw_rate: " << velocity << ", " << yaw_rate << endl;
+	// cout << "Beginning predition step..." << endl;
+	// cout << "velocity, yaw_rate: " << velocity << ", " << yaw_rate << endl;
 	default_random_engine rand_gen; // For sampling the normal distribution
 
 	// Update each particle
@@ -115,7 +115,7 @@ void ParticleFilter::updateWeights(
 	//   The following is a good resource for the theory: https://www.willamette.edu/~gorr/classes/GeneralGraphics/Transforms/transforms2d.htm
 	//   and the following is a good resource for the actual equation to implement (look at equation 3.33): http://planning.cs.uiuc.edu/node99.html
 
-	cout << "Updating weights..." << endl;
+	// cout << "Updating weights..." << endl;
 
 	vector<double> new_weights;
 	for(int p_i = 0; p_i < num_particles; ++p_i) {

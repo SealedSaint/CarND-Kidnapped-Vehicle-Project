@@ -119,9 +119,9 @@ int main() {
 						}
 						weight_sum += particles[i].weight;
 					}
-					cout << "THESE SHOULD NOT BE ZERO:" << endl;
-					cout << "w sum: " << weight_sum << endl;
-					cout << "highest w: " << highest_weight << endl;
+					// cout << "THESE SHOULD NOT BE ZERO:" << endl;
+					// cout << "w sum: " << weight_sum << endl;
+					// cout << "highest w: " << highest_weight << endl;
 
 					json msgJson;
 					msgJson["best_particle_x"] = best_particle.x;
